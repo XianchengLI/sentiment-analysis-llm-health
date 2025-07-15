@@ -8,8 +8,10 @@ This repository contains the implementation for the research paper "The Promise 
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/XianchengLI/sentiment-analysis-llm-health.git
 cd sentiment-analysis-llm-health
+
+# Or download ZIP from: https://github.com/XianchengLI/sentiment-analysis-llm-health
 
 # Install dependencies
 pip install -r requirements.txt
