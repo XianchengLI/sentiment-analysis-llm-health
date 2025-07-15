@@ -74,6 +74,7 @@ results = run_experiment_with_custom_data(
 - 🏥 **Health-Domain Optimized**: Expert-derived codebook for health community analysis
 - 🔄 **Zero-shot & Few-shot**: Both learning approaches implemented
 - 🔒 **Privacy-Aware**: Works with synthetic data for demonstration
+- 🔮 **Pure Prediction Mode**: Analyze new data without ground truth labels, simple usage as other sentiment analysis tools
 
 ## 📁 Project Structure
 
@@ -207,8 +208,10 @@ Your dataset should be a CSV or Excel file. **Column names are completely flexib
 | Your Column Name | Description | Example Values |
 |------------------|-------------|----------------|
 | Any ID column | Unique identifier | POST_001, ID_123, message_id |
-| Any text column | Text to analyze | "I feel much better after...", "症状改善了" |
-| Any label column | Expert annotations | Positive/Negative/Neutral, 1/0/-1, Good/Bad/OK |
+| Any text column | Text to analyze | "I feel much better after..." |
+| Any label column | Expert annotations | Positive/Negative/Neutral |
+
+**Note**: Ground truth labels are only needed for evaluation experiments, not for pure prediction.
 
 ### Usage with Custom Columns:
 
@@ -221,6 +224,26 @@ results = run_experiment_with_custom_data(
     content_col="PostContent",     # ← Your actual text column name  
     expert_label_col="TrueLabel"   # ← Your actual label column name
 )
+```
+
+### Pure Prediction (No Ground Truth Needed)
+
+```python
+# Predict sentiment for new, unlabeled data
+from experiments.run_experiments import predict_sentiment_batch
+
+results = predict_sentiment_batch(
+    data_path="../data/new_posts.csv",
+    models=["gpt-4o-mini", "llama3.1-70b"],
+    post_id_col="PostID",
+    content_col="Content",
+    prompt_template="few_shot_prompt",
+    verbose=True
+)
+
+# Results include original data + predictions from each model
+print(results[['PostID', 'Content', 'Predicted_gpt-4o-mini', 'Predicted_llama3.1-70b']])
+
 ```
 
 **Supported formats:**
