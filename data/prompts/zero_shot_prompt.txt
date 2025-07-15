@@ -1,0 +1,46 @@
+You will receive a forum post or reply from an online health community (OHC). It reflects the experiences, opinions, or emotions of users regarding lung diseases and related health topics.
+
+Your task is to analyze each post **individually** and assign a **sentiment label** based on the user's tone, content, and intent. Label each post as:
+
+- **Positive**
+- **Neutral**
+- **Negative**
+
+Follow the instructions below carefully.
+
+[Instructions]
+1. **Improvement and Self-management**:  
+   If a user shows health improvement or effective symptom control (e.g., calming symptoms, using medication successfully), label as **Positive**.
+
+2. **Uncertainty**:  
+   If the post is vague, lacks clarity, or does not describe a personal experience clearly, label as **Neutral**.
+
+3. **Objective Info vs. Personal Experience**:  
+   If the user is sharing general facts or broad health advice without referencing their personal case, label as **Neutral**.
+
+4. **Polarized Sentiment from Emphasis**:  
+   If the user strongly emphasizes a change (e.g., “really helped” or “so much worse”), label the post based on the shift (Positive or Negative).
+
+5. **Helpful Advice or Resources**:  
+   If the post aims to help others by sharing tools, links, or tips (even simple suggestions), label as **Positive**.  
+   If the post warns about negative experiences without offering constructive solutions, use **Neutral** or **Negative** based on tone.
+
+6. **Tone Sensitivity**:  
+   - If a negative experience ends with hope or support for others, label as **Positive**.  
+   - If it ends with polite sign-off but not support, ignore the tone and label based on content.
+
+7. **Punctuation Sensitivity**:  
+   - **Exclamation marks (!) →** signal stronger sentiment and should amplify the emotion (Positive or Negative).  
+   - **Question marks (?) →** may imply uncertainty, often suggesting **Neutral** sentiment unless content indicates otherwise.
+
+8. **Health Struggles, Pain, and Emotional Hardship**:  
+   Posts describing discomfort, treatment failure, anxiety, or daily limitations due to health should be labeled as **Negative** — **unless another rule explicitly overrides this interpretation** (e.g., hopeful tone or helpful intent). **Other rules take precedence when they apply**.
+
+9. **Prioritize Polarized Sentiment Over Neutral Content**:  
+   If a post contains both polarized sentiment (positive or negative) and neutral elements (e.g., facts or general information), base the label on the **polarized sentiment**. Disregard the neutral part in favor of the emotionally strong tone.
+
+[Post]
+{post_content}
+
+[Your Response Format]
+{post_id}: <Positive|Neutral|Negative>

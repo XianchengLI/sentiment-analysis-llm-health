@@ -1,0 +1,44 @@
+# Main configuration file for sentiment analysis experiments
+
+# Experiment Settings
+experiment:
+  name: "sentiment_analysis_llm_health"
+  output_dir: "results/"
+  random_seed: 42
+  sample_size: 200
+  
+# Data Configuration  
+data:
+  sample_data_dir: "data/sample_data/"
+  prompts_dir: "data/prompts/"
+  processed_dir: "data/processed/"
+  
+# Model Configuration
+models:
+  default_temperature: 0.0
+  default_max_tokens: 50
+  retry_attempts: 6
+  
+# Evaluation Settings
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "kappa"
+  
+  agreement_threshold: 0.05
+  
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/experiment.log"
+  
+# Paths
+paths:
+  data: "data/"
+  results: "results/"
+  logs: "logs/"
+  config: "config/"

@@ -1,0 +1,48 @@
+# Model-specific configurations
+
+models:
+  # GPT Models
+  gpt-4o-mini:
+    provider: "openai"
+    model_name: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 50
+    cost_per_1k_tokens: 0.00015
+    
+  gpt-4.1:
+    provider: "openai" 
+    model_name: "gpt-4.1"
+    temperature: 0.0
+    max_tokens: 50
+    cost_per_1k_tokens: 0.001
+    
+  o3-mini:
+    provider: "openai"
+    model_name: "o3-mini"
+    temperature: 0.0  
+    max_tokens: 50
+    cost_per_1k_tokens: 0.0003
+
+# Prompt Templates
+prompt_templates:
+  zero_shot:
+    name: "zero_shot_prompt"
+    description: "Zero-shot learning with expert guidelines"
+    
+  few_shot:
+    name: "few_shot_prompt" 
+    description: "Few-shot learning with examples"
+
+# Evaluation Metrics
+metrics:
+  primary:
+    - "accuracy"
+    - "f1_macro"
+    - "kappa"
+    
+  secondary:
+    - "precision_macro"
+    - "recall_macro"
+    - "precision_per_class"
+    - "recall_per_class"
+    - "f1_per_class"

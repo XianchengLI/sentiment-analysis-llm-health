@@ -1,0 +1,6 @@
+PostId,Body,Expert_Label,Category
+POST_001,"I thought I'd need help last night, but I managed to calm my breathing down.",Positive,Health Improvement
+POST_018,The research shows mixed results for this treatment approach.,Neutral,Generated
+POST_016,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_002,There was a fuss about the drug about ten years ago and I am not sure how widely it is now used.,Neutral,Uncertainty
+POST_009,The new inhaler technique really helped me during my workout today.,Positive,Generated

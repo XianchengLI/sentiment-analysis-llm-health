@@ -1,0 +1,21 @@
+PostId,Body,Expert_Label,Category
+POST_001,"I thought I'd need help last night, but I managed to calm my breathing down.",Positive,Health Improvement
+POST_002,There was a fuss about the drug about ten years ago and I am not sure how widely it is now used.,Neutral,Uncertainty
+POST_003,"The medication isn't working as expected, and I feel worse than before!",Negative,Treatment Failure
+POST_004,You can find breathing exercises online on YouTube for the same purpose. Have a look!,Positive,Helpful Resources
+POST_005,I'm still awake thanks to lungs throwing a major strop. Hope you are all managing to sleep well,Positive,Supportive Tone
+POST_006,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_007,Here's a link to breathing exercises that worked well for me. Hope it helps others too!,Positive,Generated
+POST_008,Another sleepless night due to chest tightness. This is becoming exhausting.,Negative,Generated
+POST_009,The new inhaler technique really helped me during my workout today.,Positive,Generated
+POST_010,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_011,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_012,The research shows mixed results for this treatment approach.,Neutral,Generated
+POST_013,The new inhaler technique really helped me during my workout today.,Positive,Generated
+POST_014,The new inhaler technique really helped me during my workout today.,Positive,Generated
+POST_015,Here's a link to breathing exercises that worked well for me. Hope it helps others too!,Positive,Generated
+POST_016,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_017,Has anyone tried the new inhaler device? Wondering about side effects.,Neutral,Generated
+POST_018,The research shows mixed results for this treatment approach.,Neutral,Generated
+POST_019,Finally found a doctor who listens! Feeling hopeful about the treatment plan.,Positive,Generated
+POST_020,The research shows mixed results for this treatment approach.,Neutral,Generated
