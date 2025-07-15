@@ -351,6 +351,157 @@ def run_experiment_with_custom_data(
     
     return all_results
 
+def predict_sentiment_batch(
+    data_path: str,
+    models: List[str],
+    post_id_col: str = "PostId",
+    content_col: str = "Body",
+    prompt_template: str = "few_shot_prompt", 
+    output_dir: str = "results/predictions/",
+    verbose: bool = True
+) -> pd.DataFrame:
+    """
+    Predict sentiment for unlabeled data (no ground truth needed)
+    
+    Args:
+        data_path: Path to the dataset file (CSV or Excel)
+        models: List of model names to use (e.g., ["gpt-4o-mini", "llama3.1-70b"])
+        post_id_col: Column name for post IDs
+        content_col: Column name for post content
+        prompt_template: Prompt template to use (default: "few_shot_prompt")
+        output_dir: Directory to save predictions
+        verbose: Whether to print detailed progress information
+        
+    Returns:
+        pd.DataFrame: Original data with predicted sentiment columns for each model
+        
+    Example:
+        df_results = predict_sentiment_batch(
+            data_path="new_posts.csv",
+            models=["gpt-4o-mini", "llama3.1-70b"],
+            post_id_col="ID",
+            content_col="PostText"
+        )
+    """
+    
+    # Initialize experiment
+    experiment = SentimentExperiment()
+    
+    # Path adjustments for running from notebooks
+    if os.path.exists("../data/prompts"):
+        experiment.prompt_manager = PromptManager(prompt_dir="../data/prompts")
+        if not output_dir.startswith("../"):
+            output_dir = "../" + output_dir
+    
+    # Load data
+    if verbose:
+        print(f" Loading data from: {data_path}")
+    df = experiment.load_data(data_path)
+    if verbose:
+        print(f" Loaded {len(df)} posts for prediction")
+    
+    # Validate required columns
+    required_cols = [post_id_col, content_col]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing required columns: {missing_cols}. Available columns: {list(df.columns)}")
+    
+    if verbose:
+        print(f" Using columns: PostID='{post_id_col}', Content='{content_col}'")
+        print(f" Predicting sentiment using prompt: {prompt_template}")
+    
+    # Initialize results DataFrame
+    results_df = df.copy()
+    
+    # Run predictions for each model
+    for model in models:
+        if verbose:
+            print(f"\n Predicting with {model}...")
+        
+        try:
+            # Generate prompts
+            prompts = experiment.prompt_manager.generate_prompts_for_dataframe(
+                df=df,
+                post_id_col=post_id_col,
+                content_col=content_col,
+                template_name=prompt_template
+            )
+            
+            # Get predictions
+            prompt_list = [prompts[str(post_id)] for post_id in df[post_id_col]]
+            post_ids = [str(post_id) for post_id in df[post_id_col]]
+            
+            responses = experiment.llm_client.batch_generate_labels(
+                prompts=prompt_list,
+                model=model,
+                show_progress=verbose
+            )
+            
+            # Parse responses
+            parsed_results = ResponseParser.parse_batch_responses(responses, post_ids)
+            
+            # Add predictions to results
+            if parsed_results:
+                prediction_df = pd.DataFrame(parsed_results)
+                prediction_df[post_id_col] = prediction_df['PostId'].astype(df[post_id_col].dtype)
+                
+                # Merge predictions
+                results_df = results_df.merge(
+                    prediction_df[[post_id_col, 'Sentiment']].rename(
+                        columns={'Sentiment': f'Predicted_{model}'}
+                    ),
+                    on=post_id_col,
+                    how='left'
+                )
+                
+                # Calculate response rate
+                response_count = len([r for r in responses if r is not None])
+                response_rate = response_count / len(responses)
+                
+                if verbose:
+                    print(f" {model}: {response_count}/{len(responses)} predictions ({response_rate:.1%} success rate)")
+                    
+                    # Show prediction distribution
+                    pred_col = f'Predicted_{model}'
+                    if pred_col in results_df.columns:
+                        distribution = results_df[pred_col].value_counts().to_dict()
+                        print(f" Distribution: {distribution}")
+            else:
+                if verbose:
+                    print(f"❌ {model}: No valid predictions generated")
+                # Add empty column for consistency
+                results_df[f'Predicted_{model}'] = None
+                
+        except Exception as e:
+            error_msg = f"❌ Error with {model}: {e}"
+            if verbose:
+                print(error_msg)
+            # Add empty column for failed model
+            results_df[f'Predicted_{model}'] = None
+    
+    # Save results
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Generate timestamp for unique filename
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_filename = f"sentiment_predictions_{timestamp}.csv"
+    output_path = os.path.join(output_dir, output_filename)
+    
+    results_df.to_csv(output_path, index=False)
+    
+    if verbose:
+        print(f"\n Predictions saved to: {output_path}")
+        print(f" Results summary:")
+        print(f"   - Total posts: {len(results_df)}")
+        print(f"   - Models used: {models}")
+        
+        # Show columns added
+        new_cols = [col for col in results_df.columns if col.startswith('Predicted_')]
+        print(f"   - New columns: {new_cols}")
+    
+    return results_df
+
 
 if __name__ == "__main__":
     run_simple_experiment()
