@@ -240,7 +240,54 @@ class LLMClient:
         
         return available_models
 
+    # add confidence
 
+    def generate_sentiment_with_confidence(
+        self, 
+        prompt: str, 
+        model: str = "gpt-4o-mini",
+        temperature: float = 0.0,
+        max_tokens: int = 100  
+    ) -> Optional[str]:
+        """
+        Generate sentiment label with confidence score
+        
+        Args:
+            prompt: The formatted prompt containing confidence requirements
+            model: The model to use for generation
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens in response (increased for confidence)
+            
+        Returns:
+            str: The generated response with sentiment and confidence
+        """
+        return self.generate_sentiment_label(
+            prompt=prompt,
+            model=model, 
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+
+    def batch_generate_labels_with_confidence(
+        self, 
+        prompts: List[str], 
+        model: str = "gpt-4o-mini",
+        temperature: float = 0.0,
+        max_tokens: int = 100,
+        show_progress: bool = True
+    ) -> List[Optional[str]]:
+        """
+        Generate sentiment labels with confidence for a batch of prompts
+        """
+        return self.batch_generate_labels(
+            prompts=prompts,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            show_progress=show_progress
+        )
+
+  
 class ResponseParser:
     """
     Parser for LLM responses to extract sentiment labels
@@ -301,6 +348,86 @@ class ResponseParser:
         
         for response, post_id in zip(responses, post_ids):
             parsed = ResponseParser.parse_sentiment_response(response, post_id)
+            if parsed:
+                parsed_results.append(parsed)
+        
+        return parsed_results
+
+    # add confidence
+
+    @staticmethod
+    def parse_sentiment_with_confidence_response(response: str, post_id: str) -> Optional[Dict[str, Union[str, float]]]:
+        """
+        Parse LLM response to extract post ID, sentiment, and confidence
+        
+        Args:
+            response: Raw response from LLM (format: "POST_ID: Sentiment, Confidence")
+            post_id: Expected post ID
+            
+        Returns:
+            Dict with PostId, Sentiment, and Confidence
+        """
+        if not response:
+            return None
+            
+        lines = response.splitlines()
+        for line in lines:
+            if ":" in line and "," in line:
+                try:
+                    # Parse format: "POST_001: Positive, 0.85"
+                    parts = line.split(":", 1)
+                    if len(parts) == 2:
+                        parsed_id = parts[0].strip()
+                        sentiment_confidence = parts[1].strip()
+                        
+                        # Split sentiment and confidence
+                        sentiment_parts = sentiment_confidence.split(",")
+                        if len(sentiment_parts) == 2:
+                            sentiment = sentiment_parts[0].strip()
+                            confidence_str = sentiment_parts[1].strip()
+                            
+                            # Convert confidence to float
+                            try:
+                                confidence = float(confidence_str)
+                                confidence = max(0.0, min(1.0, confidence))  # Clamp to [0,1]
+                            except ValueError:
+                                logger.warning(f"Invalid confidence value: {confidence_str}")
+                                confidence = 0.0
+                            
+                            return {
+                                "PostId": parsed_id,
+                                "Sentiment": sentiment,
+                                "Confidence": confidence
+                            }
+                except Exception as e:
+                    logger.warning(f"Error parsing line '{line}': {e}")
+                    continue
+        
+        # Fallback: try to extract sentiment without confidence
+        sentiment_keywords = ["Positive", "Negative", "Neutral"]
+        for keyword in sentiment_keywords:
+            if keyword.lower() in response.lower():
+                return {
+                    "PostId": post_id,
+                    "Sentiment": keyword,
+                    "Confidence": 0.0  # Default low confidence for fallback
+                }
+        
+        logger.warning(f"Could not parse confidence response: {response}")
+        return None
+
+    @staticmethod
+    def parse_batch_responses_with_confidence(
+        responses: List[str], 
+        post_ids: List[str]
+    ) -> List[Dict[str, Union[str, float]]]:
+        """
+        Parse a batch of LLM responses with confidence
+        """
+        parsed_results = []
+        
+        for response, post_id in zip(responses, post_ids):
+            parsed = ResponseParser.parse_sentiment_with_confidence_response(response, post_id)
             if parsed:
                 parsed_results.append(parsed)
         

@@ -1,0 +1,16 @@
+Additionally, you must provide a **confidence score** between 0.0 and 1.0 that reflects your certainty about the sentiment classification.
+
+**Confidence Scale:**
+- **0.9-1.0**: Very High - Unambiguous sentiment with clear emotional indicators
+- **0.7-0.8**: High - Clear sentiment with strong supporting evidence
+- **0.5-0.6**: Moderate - Reasonably clear sentiment with some ambiguity
+- **0.3-0.4**: Low - Mixed or unclear sentiment signals
+- **0.1-0.2**: Very Low - Highly ambiguous or contradictory sentiment
+- **0.0**: No confidence - Cannot determine sentiment
+
+**Key Factors for Confidence Assessment:**
+1. **Emotional Language Clarity**: Explicit positive/negative words increase confidence
+2. **Content Ambiguity**: Mixed emotions or neutral facts decrease confidence  
+3. **Personal vs General**: Personal experiences typically have clearer sentiment
+4. **Linguistic Certainty**: Definitive statements vs uncertain expressions
+5. **Context Completeness**: Sufficient context vs fragmented information

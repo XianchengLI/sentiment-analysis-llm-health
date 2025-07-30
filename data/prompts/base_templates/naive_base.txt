@@ -1,0 +1,14 @@
+You will receive a forum post or reply from an online health community (OHC). It reflects the experiences, opinions, or emotions of users regarding lung diseases and related health topics.
+
+Your task is to analyze each post **individually** and assign a **sentiment label** based on the user's tone, content, and intent. Label each post as:
+
+- **Positive**
+- **Neutral**
+- **Negative**
+
+{confidence_section}
+
+[Post]
+{post_content}
+
+{response_format}
