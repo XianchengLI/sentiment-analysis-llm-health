@@ -317,6 +317,23 @@ confidence_results = run_experiment_with_confidence(
 - Multiple file formats: CSV (auto-encoding detection), Excel (.xlsx)
 - International text: Automatic encoding detection (UTF-8, GBK, GB2312, etc.)
 
+### Confidence Calibration Visualization:
+
+```python
+custom_runner = ConfidenceAnalysisRunner(
+    data_path="../data/sample_data/your_data.csv", 
+    sentiment_mapping={-1: 'Negative', 0: 'Neutral', 1: 'Positive'},  # Adjust as needed
+    true_label_col="TrueLabel"  # Adjust column name
+)
+
+# visualisation with select models and prompts
+custom_results = custom_runner.run_calibration_visualization(
+    models_to_test=["o3", "o3-mini"],  # Add more models like "gpt-4.1", "gpt-4.1-mini"
+    prompt_templates=["zero_shot", "few_shot","naive"],  # Focus on specific prompts
+    output_dir="../results/confidence_analysis_custom"
+)
+```
+
 ## 🔧 Troubleshooting
 
 ### Common Issues
