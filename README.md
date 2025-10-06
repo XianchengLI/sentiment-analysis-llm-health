@@ -190,7 +190,7 @@ results = predict_sentiment_batch(
 # Results: Original data + Predicted_model columns
 ```
 
-### New: Pure Prediction - Confidence Mode
+### Pure Prediction - Confidence Mode
 
 ```python
 from experiments.run_experiments import predict_sentiment_batch_with_confidence
@@ -230,50 +230,6 @@ for exp_name, result in results.items():
         acc = result['metrics'].get('accuracy', 0)
         mean_conf = result['metrics'].get('mean_confidence', 0)
         print(f"{exp_name}: Accuracy {acc:.3f}, Mean Confidence {mean_conf:.3f}")
-```
-
-## 🎛️ Configuration
-
-### Confidence Assessment
-
-The confidence feature uses unified guidelines that assess model certainty on a 0-1 scale:
-
-- **0.9-1.0**: Very High - Unambiguous sentiment with clear indicators
-- **0.7-0.8**: High - Clear sentiment with strong supporting evidence  
-- **0.5-0.6**: Moderate - Reasonably clear with some ambiguity
-- **0.3-0.4**: Low - Mixed or unclear sentiment signals
-- **0.1-0.2**: Very Low - Highly ambiguous or contradictory
-- **0.0**: No confidence - Cannot determine sentiment
-
-### Custom Prompt Templates
-
-**Traditional Mode:**
-Create prompts in `data/prompts/`:
-```
-data/prompts/
-├── zero_shot_prompt.txt      # Complete prompt with fixed format
-├── few_shot_prompt.txt       # Complete prompt with examples
-└── custom_domain_prompt.txt  # Domain-specific complete prompt
-```
-
-**Confidence Mode:**
-Create base templates in `data/prompts/base_templates/`:
-```
-data/prompts/base_templates/
-├── zero_shot_base.txt        # Core content with {confidence_section}, {response_format}
-├── few_shot_base.txt         # Core content with placeholders
-└── custom_base.txt           # Custom base template
-```
-
-### Model Configuration
-
-Edit `config/models.yaml` to adjust model parameters (applies to GPT models that support these parameters):
-
-```yaml
-models:
-  gpt-4o-mini:
-    temperature: 0.0
-    max_tokens: 50
 ```
 
 ## 📊 Data Format Requirements
@@ -332,6 +288,178 @@ custom_results = custom_runner.run_calibration_visualization(
     prompt_templates=["zero_shot", "few_shot","naive"],  # Focus on specific prompts
     output_dir="../results/confidence_analysis_custom"
 )
+```
+
+## 🔬 Research Workflow
+
+![Research Workflow](docs/github_llm.png)
+
+### Overview
+
+Our research follows a systematic four-stage pipeline that combines expert knowledge with advanced language models for health sentiment analysis:
+
+#### 1. **Data & Codebook Development**
+- **Pilot Sample Selection**: Representative subset extracted from all data
+- **Consensus Process**: Expert panel conducts independent labeling, establishes inter-annotator agreement, and refines interpretation guidelines
+- **Structured Codebook**: Finalized label definitions, decision rules, and annotated examples for consistent sentiment classification
+
+#### 2. **Model Implementation**
+Two parallel approaches for comprehensive evaluation:
+
+**Large Language Models (LLMs)**:
+- **Prompt Engineering**: Zero-shot (rules only) and Few-shot (rules + examples) strategies
+- **Supported Models**: GPT-4.1, GPT-o3, DeepSeek, LLaMA 3.1
+- **Output**: 3-class sentiment predictions + confidence scores
+
+**Traditional Baselines**:
+- BioBERT (4 variants for domain-specific comparison)
+- SentiWordNet (lexicon-based approach)
+- VADER (rule-based sentiment analyzer)
+- TextBlob (pattern-based sentiment analysis)
+
+#### 3. **Expert Annotation**
+- **Gold Standard**: Majority voting from expert panel annotations
+- **Quality Assurance**: Inter-annotator agreement metrics ensure reliability
+- **Evaluation Sample**: Independent test set for unbiased performance assessment
+
+#### 4. **Performance Evaluation**
+Comprehensive multi-metric evaluation framework:
+
+- **Classification Metrics**: Accuracy, Precision, Recall, F1-score
+- **Agreement Metrics**: Fleiss' kappa for inter-rater reliability
+- **Confidence Calibration**:
+  - Confidence vs. Accuracy alignment
+  - Confidence vs. Inter-annotator agreement correlation
+  - Model uncertainty quantification
+
+This workflow ensures rigorous methodology while maintaining flexibility for domain adaptation and model comparison.
+
+### 🔄 Adapting to Other Text Labeling Tasks
+
+While this framework was developed for health sentiment analysis, it can be adapted to other text classification tasks. Here's how to migrate:
+
+#### Required Modifications
+
+**Step 1: Develop Your Domain-Specific Codebook**
+- Define clear label categories for your task (e.g., topic classification, emotion detection, urgency assessment)
+- Create decision rules based on domain expertise
+- Include annotated examples that demonstrate edge cases
+- Establish consensus through pilot annotation with domain experts
+
+**Step 2: Update Prompt Templates**
+
+For **Traditional Mode** (sentiment only):
+1. Edit prompt files in `data/prompts/`:
+   - Replace sentiment-specific rules with your codebook guidelines
+   - Update label definitions (e.g., Positive/Negative/Neutral → your categories)
+   - Modify examples to match your domain
+
+For **Confidence Mode** (with confidence scores):
+1. Edit base templates in `data/prompts/base_templates/`:
+   - Update core classification rules in the template
+   - Keep the `{confidence_section}` and `{response_format}` placeholders
+   - The system will automatically inject confidence guidelines
+
+**Step 3: Define Confidence Scoring (Optional)**
+
+If using confidence assessment, define domain-specific confidence criteria in `data/prompts/confidence_guidelines.txt`:
+
+```
+High Confidence (0.8-1.0):
+- Clear domain-specific indicators present
+- Unambiguous feature patterns
+- Strong alignment with codebook rules
+
+Moderate Confidence (0.5-0.7):
+- Some ambiguity in feature interpretation
+- Partial match with multiple categories
+- Context provides reasonable certainty
+
+Low Confidence (0.0-0.4):
+- Mixed or contradictory signals
+- Insufficient context
+- Edge cases not covered by codebook
+```
+
+#### Example: Migrating to Emotion Detection
+
+```python
+# Original: Health Sentiment Analysis
+labels = ["Positive", "Negative", "Neutral"]
+
+# New Task: Emotion Detection
+labels = ["Joy", "Sadness", "Anger", "Fear", "Surprise", "Neutral"]
+
+# Update prompts with emotion-specific rules:
+# - Joy: Expressions of happiness, satisfaction, excitement
+# - Anger: Frustration, complaints, aggressive language
+# ... (continue with your codebook)
+```
+
+#### 📢 Important Performance Validation Notice
+
+> **⚠️ STRONGLY RECOMMENDED**: Follow our complete workflow for rigorous performance evaluation when adapting to new tasks.
+>
+> - **Our experiments validate performance specifically for sentiment analysis** in health communities
+> - **Other text labeling tasks may show different performance patterns** depending on:
+>   - Task complexity and label granularity
+>   - Domain-specific language characteristics
+>   - Codebook quality and clarity
+>   - Data distribution and edge cases
+>
+> **Before production deployment**, you MUST:
+> 1. Follow the 4-stage workflow with your domain data
+> 2. Conduct thorough performance evaluation with expert-annotated gold standard
+> 3. Compare multiple models and prompt strategies
+> 4. Validate confidence calibration if using confidence scores
+> 5. Select the most appropriate model based on YOUR task-specific metrics
+>
+> **Model performance is task-dependent** - what works for sentiment analysis may not be optimal for your specific use case. Always validate empirically.
+
+---
+
+## 🎛️ Configuration
+
+### Confidence Assessment
+
+The confidence feature uses unified guidelines that assess model certainty on a 0-1 scale:
+
+- **0.9-1.0**: Very High - Unambiguous sentiment with clear indicators
+- **0.7-0.8**: High - Clear sentiment with strong supporting evidence  
+- **0.5-0.6**: Moderate - Reasonably clear with some ambiguity
+- **0.3-0.4**: Low - Mixed or unclear sentiment signals
+- **0.1-0.2**: Very Low - Highly ambiguous or contradictory
+- **0.0**: No confidence - Cannot determine sentiment
+
+### Custom Prompt Templates
+
+**Traditional Mode:**
+Create prompts in `data/prompts/`:
+```
+data/prompts/
+├── zero_shot_prompt.txt      # Complete prompt with fixed format
+├── few_shot_prompt.txt       # Complete prompt with examples
+└── custom_domain_prompt.txt  # Domain-specific complete prompt
+```
+
+**Confidence Mode:**
+Create base templates in `data/prompts/base_templates/`:
+```
+data/prompts/base_templates/
+├── zero_shot_base.txt        # Core content with {confidence_section}, {response_format}
+├── few_shot_base.txt         # Core content with placeholders
+└── custom_base.txt           # Custom base template
+```
+
+### Model Configuration
+
+Edit `config/models.yaml` to adjust model parameters (applies to GPT models that support these parameters):
+
+```yaml
+models:
+  gpt-4o-mini:
+    temperature: 0.0
+    max_tokens: 50
 ```
 
 ## 🔧 Troubleshooting
