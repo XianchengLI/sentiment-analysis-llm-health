@@ -1,8 +1,3 @@
-"""
-Production script for confidence calibration analysis
-Creates publication-ready calibration plots with confidence distributions and calibration curves
-"""
-
 import pandas as pd
 import numpy as np
 from pathlib import Path
